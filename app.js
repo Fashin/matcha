@@ -39,7 +39,7 @@ app.use(flash());
 
 app.use('/connection', connection);
 app.use('/deconnection', deconnection);
-// app.use('/chat', chat);
+app.use('/chat', chat);
 // app.use('/myprofile', myprofile);
 app.use('/register', register);
 // app.use('/update', update);
@@ -47,15 +47,6 @@ app.use('/register', register);
 // app.use('/users', users);
 app.use('/', index);
 // app.use('/picture', picture);
-
-// var Session = require('express-session');
-// var SessionStore = require('session-file-store')(Session);
-// var session = Session({
-// 	store: new SessionStore({path: __dirname+'/tmp/sessions'}),
-// 	secret: 'pass',
-// 	resave: true,
-// 	saveUninitialized: true
-//	});
 
 // SET
 
@@ -84,20 +75,19 @@ var ent = require('ent');
 var io = require('socket.io').listen(server);
 
 
-// io.sockets.on('connection', function (socket, pseudo) {
-//     // Dès qu'on nous donne un pseudo, on le stocke en variable de session et on informe les autres personnes
-//     socket.on('nouveau_client', function(pseudo) {
-//         pseudo = ent.encode(pseudo);
-//         socket.pseudo = pseudo;
-//         socket.broadcast.emit('nouveau_client', pseudo);
-//     });
-//
-//     // Dès qu'on reçoit un message, on récupère le pseudo de son auteur et on le transmet aux autres personnes
-//     socket.on('message', function (message) {
-//         message = ent.encode(message);
-//         socket.broadcast.emit('message', {pseudo: socket.pseudo, message: message});
-//     });
-// });
+io.sockets.on('connection', (socket) => {
+    // Dès qu'on nous donne un pseudo, on le stocke en variable de session et on informe les autres personnes
+    socket.on('nouveau_client', (data) => {
+        socket.pseudo = ent.encode(data.login);
+        socket.broadcast.emit('nouveau_client', {pseudo: socket.pseudo});
+    });
+		
+		// Dès qu'on reçoit un message, on récupère le pseudo de son auteur et on le transmet aux autres personnes
+    socket.on('message', (message) => {
+        message = ent.encode(message);
+        socket.broadcast.emit('message', {pseudo: socket.pseudo, message: message});
+    });
+});
 
 // var io = require('socket.io')(server);
 // var sharedsession = require("express-socket.io-session");
